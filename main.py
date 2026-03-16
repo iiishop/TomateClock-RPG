@@ -121,6 +121,7 @@ class PomodoroBridge(QObject):
         self._total_seconds = minutes * 60
         self._remaining_seconds = self._total_seconds
         self.selectedPresetChanged.emit()
+        self.totalSecondsChanged.emit()
         self._emit_timer_changes()
 
     @Slot()
@@ -172,7 +173,6 @@ class PomodoroBridge(QObject):
     def _emit_timer_changes(self) -> None:
         self.remainingSecondsChanged.emit()
         self.formattedRemainingChanged.emit()
-        self.totalSecondsChanged.emit()
         self.progressChanged.emit()
 
     def _emit_focus_changes(self) -> None:
