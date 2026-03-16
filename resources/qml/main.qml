@@ -319,7 +319,7 @@ ApplicationWindow {
         }
 
         function onProgressChanged() {
-            ring.requestPaint()
+            // Repaint is handled in onRemainingSecondsChanged to avoid double repaint per tick.
         }
 
         function onTitleUpgraded(newTitle) {
