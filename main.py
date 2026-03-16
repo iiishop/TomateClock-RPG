@@ -59,6 +59,12 @@ class PomodoroBridge(QObject):
 
     @Property(str, notify=formattedRemainingChanged)
     def formattedRemaining(self) -> str:
+        if self._remaining_seconds >= 3600:
+            hours = self._remaining_seconds // 3600
+            minutes = (self._remaining_seconds % 3600) // 60
+            seconds = self._remaining_seconds % 60
+            return f"{hours}:{minutes:02d}:{seconds:02d}"
+
         minutes = self._remaining_seconds // 60
         seconds = self._remaining_seconds % 60
         return f"{minutes:02d}:{seconds:02d}"
@@ -86,6 +92,18 @@ class PomodoroBridge(QObject):
     @Property(int, notify=selectedPresetChanged)
     def selectedPreset(self) -> int:
         return self._selected_preset
+
+    @Property(int, notify=totalSecondsChanged)
+    def manualHours(self) -> int:
+        return self._total_seconds // 3600
+
+    @Property(int, notify=totalSecondsChanged)
+    def manualMinutes(self) -> int:
+        return (self._total_seconds % 3600) // 60
+
+    @Property(int, notify=totalSecondsChanged)
+    def manualSeconds(self) -> int:
+        return self._total_seconds % 60
 
     @Property("QVariantList", notify=presetsChanged)
     def presets(self) -> list[int]:
@@ -121,6 +139,29 @@ class PomodoroBridge(QObject):
         self._total_seconds = minutes * 60
         self._remaining_seconds = self._total_seconds
         self.selectedPresetChanged.emit()
+        self.totalSecondsChanged.emit()
+        self._emit_timer_changes()
+
+    @Slot(int, int, int)
+    def setCustomTime(self, hours: int, minutes: int, seconds: int) -> None:
+        if self._is_running:
+            return
+
+        safe_hours = max(0, min(99, int(hours)))
+        safe_minutes = max(0, min(59, int(minutes)))
+        safe_seconds = max(0, min(59, int(seconds)))
+
+        total_seconds = safe_hours * 3600 + safe_minutes * 60 + safe_seconds
+        if total_seconds <= 0:
+            total_seconds = 1
+
+        selected_changed = self._selected_preset != 0
+        self._selected_preset = 0
+        self._total_seconds = total_seconds
+        self._remaining_seconds = total_seconds
+
+        if selected_changed:
+            self.selectedPresetChanged.emit()
         self.totalSecondsChanged.emit()
         self._emit_timer_changes()
 

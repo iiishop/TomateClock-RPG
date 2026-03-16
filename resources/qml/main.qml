@@ -130,39 +130,141 @@ ApplicationWindow {
                 }
             }
 
-            RowLayout {
+            ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 10
 
-                Repeater {
-                    model: bridge.presets
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
 
-                    delegate: Button {
-                        required property int modelData
-                        text: modelData + " 分钟"
-                        Layout.fillWidth: true
-                        enabled: !bridge.isRunning
+                    Repeater {
+                        model: bridge.presets
 
-                        font.family: "Microsoft YaHei UI"
-                        font.pixelSize: 14
-                        highlighted: bridge.selectedPreset === modelData
+                        delegate: Button {
+                            required property int modelData
+                            text: modelData + " 分钟"
+                            Layout.fillWidth: true
+                            enabled: !bridge.isRunning
 
-                        background: Rectangle {
-                            radius: 12
-                            color: bridge.selectedPreset === modelData ? "#D56E4A" : "#F6E3D3"
-                            border.width: 1
-                            border.color: bridge.selectedPreset === modelData ? "#D56E4A" : "#DAB89D"
+                            font.family: "Microsoft YaHei UI"
+                            font.pixelSize: 14
+                            highlighted: bridge.selectedPreset === modelData
+
+                            background: Rectangle {
+                                radius: 12
+                                color: bridge.selectedPreset === modelData ? "#D56E4A" : "#F6E3D3"
+                                border.width: 1
+                                border.color: bridge.selectedPreset === modelData ? "#D56E4A" : "#DAB89D"
+                            }
+
+                            contentItem: Label {
+                                text: parent.text
+                                color: bridge.selectedPreset === modelData ? "#FFF8EF" : "#8A4C35"
+                                font: parent.font
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+
+                            onClicked: bridge.choosePreset(modelData)
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    radius: 14
+                    color: "#F7E8DB"
+                    border.width: 1
+                    border.color: "#DDB99E"
+                    implicitHeight: customLayout.implicitHeight + 18
+
+                    function applyCustomTime() {
+                        bridge.setCustomTime(hourBox.value, minuteBox.value, secondBox.value)
+                    }
+
+                    ColumnLayout {
+                        id: customLayout
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        spacing: 8
+
+                        Label {
+                            text: "手动时间"
+                            font.family: "Microsoft YaHei UI"
+                            font.pixelSize: 14
+                            font.bold: true
+                            color: "#884631"
                         }
 
-                        contentItem: Label {
-                            text: parent.text
-                            color: bridge.selectedPreset === modelData ? "#FFF8EF" : "#8A4C35"
-                            font: parent.font
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
 
-                        onClicked: bridge.choosePreset(modelData)
+                            SpinBox {
+                                id: hourBox
+                                from: 0
+                                to: 99
+                                value: bridge.manualHours
+                                editable: true
+                                enabled: !bridge.isRunning
+                                Layout.fillWidth: true
+                                onValueModified: parent.parent.parent.applyCustomTime()
+                            }
+
+                            Label {
+                                text: "时"
+                                font.family: "Microsoft YaHei UI"
+                                font.pixelSize: 14
+                                color: "#7B412E"
+                            }
+
+                            SpinBox {
+                                id: minuteBox
+                                from: 0
+                                to: 59
+                                value: bridge.manualMinutes
+                                editable: true
+                                enabled: !bridge.isRunning
+                                Layout.fillWidth: true
+                                onValueModified: parent.parent.parent.applyCustomTime()
+                            }
+
+                            Label {
+                                text: "分"
+                                font.family: "Microsoft YaHei UI"
+                                font.pixelSize: 14
+                                color: "#7B412E"
+                            }
+
+                            SpinBox {
+                                id: secondBox
+                                from: 0
+                                to: 59
+                                value: bridge.manualSeconds
+                                editable: true
+                                enabled: !bridge.isRunning
+                                Layout.fillWidth: true
+                                onValueModified: parent.parent.parent.applyCustomTime()
+                            }
+
+                            Label {
+                                text: "秒"
+                                font.family: "Microsoft YaHei UI"
+                                font.pixelSize: 14
+                                color: "#7B412E"
+                            }
+                        }
+                    }
+
+                    Connections {
+                        target: bridge
+
+                        function onTotalSecondsChanged() {
+                            hourBox.value = bridge.manualHours
+                            minuteBox.value = bridge.manualMinutes
+                            secondBox.value = bridge.manualSeconds
+                        }
                     }
                 }
             }
