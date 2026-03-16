@@ -1,15 +1,14 @@
 ---
 task_id: TSK-2026-001
 title: 基础框架搭建
-base_branch: master
+base_branch: main
 priority: high
 status: todo
 labels: [feature]
 references:
 ---
 
-## 任务需求·
-
+## 任务需求
 这是一个简单的番茄钟应用。使用 PySide6（QML）构建 UI，使用 Python 实现后端逻辑。
 
 产品目标：
