@@ -209,7 +209,7 @@ ApplicationWindow {
                                 editable: true
                                 enabled: !bridge.isRunning
                                 Layout.fillWidth: true
-                                onValueModified: parent.parent.parent.applyCustomTime()
+                                onValueModified: root.applyCustomTime()
                             }
 
                             Label {
@@ -227,7 +227,7 @@ ApplicationWindow {
                                 editable: true
                                 enabled: !bridge.isRunning
                                 Layout.fillWidth: true
-                                onValueModified: parent.parent.parent.applyCustomTime()
+                                onValueModified: root.applyCustomTime()
                             }
 
                             Label {
@@ -245,7 +245,7 @@ ApplicationWindow {
                                 editable: true
                                 enabled: !bridge.isRunning
                                 Layout.fillWidth: true
-                                onValueModified: parent.parent.parent.applyCustomTime()
+                                onValueModified: root.applyCustomTime()
                             }
 
                             Label {
