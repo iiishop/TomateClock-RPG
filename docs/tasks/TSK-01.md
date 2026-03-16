@@ -1,24 +1,42 @@
 ---
 task_id: TSK-2026-001
-title: Short task title
-base_branch: main
+title: 基础框架搭建
+base_branch: master
 priority: high
-status: done
+status: todo
 labels: [feature]
 references:
-  - ./README.md
 ---
 
-## 任务需求
+## 任务需求·
 
-写清楚目标、范围、非目标。说明最终要看到什么结果。
+这是一个简单的番茄钟应用。使用 PySide6（QML）构建 UI，使用 Python 实现后端逻辑。
+
+产品目标：
+1. 提供现代、温馨的界面风格。
+2. 倒计时过程有明显的时间跳动反馈。
+3. 支持快捷时间设置：10 分钟、15 分钟、25 分钟。
+
+称号系统要求：
+1. 展示累计专注时长，并持久化保存。
+2. 达成里程碑时触发称号升级，至少包含：5 分钟、10 分钟、30 分钟、1 小时。
+3. 称号示例可包含“专注者”等，并搭配适度动画反馈以增强成就感。
 
 ## 任务设计
 
-写清关键方案、边界和风险。若有图纸或设计文档，务必放进 references。
+我们使用 PySide6 的 QML 系统制作 UI，使用 Python 实现后端。
+
+实现范围：
+1. 优先完成计时主流程、快捷设置、累计时长持久化和称号触发。
+2. 动画效果以轻量可维护为原则，避免影响主流程稳定性。
+3. 界面风格与组件结构保持一致，便于后续扩展。
+
 
 ## 交付验收
 
-- [ ] `uv run python -m smartworkmate.cli --repo-root . scan` 可以正常执行
-- [ ] `python -m unittest discover -s tests -p "test_*.py"` 关键测试通过
-- [ ] PR 描述包含变更点、风险和回滚策略
+- [ ] 使用 `uv run main.py` 可以正常运行
+- [ ] 至少支持 10/15/25 分钟快捷设置并可触发倒计时
+- [ ] 累计时长可持久化，重启后仍可读取
+- [ ] 至少包含 4 个称号触发阈值（5m/10m/30m/1h）
+
+--FIN--
