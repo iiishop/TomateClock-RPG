@@ -1,105 +1,133 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 ApplicationWindow {
     id: root
-    width: 460
-    height: 700
     visible: true
+    width: 460
+    height: 760
+    minimumWidth: 380
+    minimumHeight: 620
     title: "TomateClock RPG"
-    color: "#fff6eb"
 
-    property color accent: "#e36f47"
-    property color accentSoft: "#f8e4d8"
-    property color textStrong: "#3a2c28"
-    property color textDim: "#6c5651"
+    color: "#F4E9DF"
 
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
-            GradientStop { position: 0.0; color: "#fff6eb" }
-            GradientStop { position: 1.0; color: "#ffe9dd" }
+            GradientStop { position: 0.0; color: "#F8EDE4" }
+            GradientStop { position: 0.45; color: "#F3DECC" }
+            GradientStop { position: 1.0; color: "#EACCB4" }
         }
     }
 
     Rectangle {
-        id: mainCard
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            verticalCenter: parent.verticalCenter
-        }
-        width: parent.width - 48
-        height: 560
+        width: Math.min(parent.width - 36, 520)
+        height: Math.min(parent.height - 36, 740)
+        anchors.centerIn: parent
         radius: 28
-        color: "#fffdfa"
+        color: "#FFF9F2"
         border.width: 1
-        border.color: "#f2ded3"
+        border.color: "#E8C9B0"
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 24
+            anchors.margins: 26
             spacing: 18
 
             Label {
                 text: "TomateClock RPG"
-                font.pixelSize: 28
+                font.family: "Georgia"
+                font.pixelSize: 34
                 font.bold: true
-                color: root.textStrong
-                Layout.alignment: Qt.AlignHCenter
+                color: "#7D3D28"
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
             }
 
             Label {
-                text: "每一次专注都在升级"
+                text: "称号: " + bridge.currentTitle
+                font.family: "Microsoft YaHei UI"
                 font.pixelSize: 16
-                color: root.textDim
-                Layout.alignment: Qt.AlignHCenter
+                color: "#9B4D33"
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
             }
 
-            Item { Layout.preferredHeight: 6 }
-
-            Rectangle {
+            Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 170
-                radius: 24
-                color: root.accentSoft
+                Layout.preferredHeight: 300
 
-                Column {
+                Canvas {
+                    id: ring
                     anchors.centerIn: parent
-                    spacing: 6
+                    width: Math.min(parent.width - 6, 286)
+                    height: width
+                    antialiasing: true
 
-                    Text {
-                        id: timerText
-                        text: timerBridge.remaining_display
-                        font.pixelSize: 56
-                        font.bold: true
-                        color: root.textStrong
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        scale: 1.0
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        var cx = width / 2
+                        var cy = height / 2
+                        var radius = width * 0.41
+                        var start = -Math.PI / 2
+                        var end = start + (Math.PI * 2 * bridge.progress)
 
-                        SequentialAnimation on scale {
-                            id: pulseAnim
-                            running: false
-                            NumberAnimation { to: 1.08; duration: 110; easing.type: Easing.OutQuad }
-                            NumberAnimation { to: 1.0; duration: 140; easing.type: Easing.InOutQuad }
-                        }
-                    }
+                        ctx.reset()
+                        ctx.lineWidth = width * 0.08
+                        ctx.strokeStyle = "#E8D1BE"
+                        ctx.beginPath()
+                        ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+                        ctx.stroke()
 
-                    Text {
-                        text: timerBridge.is_running ? "专注进行中" : "准备开始"
-                        font.pixelSize: 16
-                        color: root.textDim
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        ctx.lineWidth = width * 0.09
+                        var gradient = ctx.createLinearGradient(0, 0, width, height)
+                        gradient.addColorStop(0.0, "#D4563F")
+                        gradient.addColorStop(1.0, "#F19153")
+                        ctx.strokeStyle = gradient
+                        ctx.lineCap = "round"
+                        ctx.beginPath()
+                        ctx.arc(cx, cy, radius, start, end, false)
+                        ctx.stroke()
                     }
                 }
-            }
 
-            Label {
-                text: "快速开始"
-                font.pixelSize: 15
-                font.bold: true
-                color: root.textStrong
+                Rectangle {
+                    width: ring.width * 0.68
+                    height: width
+                    radius: width / 2
+                    anchors.centerIn: ring
+                    color: "#FFF4EA"
+                    border.width: 1
+                    border.color: "#E7C7AF"
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 4
+
+                        Label {
+                            id: timeText
+                            text: bridge.formattedRemaining
+                            font.family: "Consolas"
+                            font.bold: true
+                            font.pixelSize: 46
+                            color: "#8B3D2B"
+                            horizontalAlignment: Text.AlignHCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+
+                        Label {
+                            text: bridge.isRunning ? "专注进行中" : "准备开始"
+                            font.family: "Microsoft YaHei UI"
+                            font.pixelSize: 14
+                            color: "#A75C40"
+                            horizontalAlignment: Text.AlignHCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+                    }
+                }
             }
 
             RowLayout {
@@ -107,80 +135,122 @@ ApplicationWindow {
                 spacing: 10
 
                 Repeater {
-                    model: [10, 15, 25]
+                    model: bridge.presets
+
                     delegate: Button {
                         required property int modelData
                         text: modelData + " 分钟"
                         Layout.fillWidth: true
-                        onClicked: timerBridge.start_preset_minutes(modelData)
+                        enabled: !bridge.isRunning
+
+                        font.family: "Microsoft YaHei UI"
+                        font.pixelSize: 14
+                        highlighted: bridge.selectedPreset === modelData
 
                         background: Rectangle {
-                            radius: 16
-                            color: parent.down ? "#d8613a" : root.accent
+                            radius: 12
+                            color: bridge.selectedPreset === modelData ? "#D56E4A" : "#F6E3D3"
+                            border.width: 1
+                            border.color: bridge.selectedPreset === modelData ? "#D56E4A" : "#DAB89D"
                         }
-                        contentItem: Text {
+
+                        contentItem: Label {
                             text: parent.text
+                            color: bridge.selectedPreset === modelData ? "#FFF8EF" : "#8A4C35"
+                            font: parent.font
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                            color: "#fff9f3"
-                            font.pixelSize: 15
-                            font.bold: true
                         }
+
+                        onClicked: bridge.choosePreset(modelData)
                     }
                 }
             }
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 10
+                spacing: 12
 
                 Button {
-                    text: "暂停"
-                    enabled: timerBridge.is_running
                     Layout.fillWidth: true
-                    onClicked: timerBridge.pause()
+                    Layout.preferredHeight: 50
+                    text: bridge.isRunning ? "暂停" : "开始专注"
+                    font.family: "Microsoft YaHei UI"
+                    font.pixelSize: 16
+                    font.bold: true
+
+                    background: Rectangle {
+                        radius: 14
+                        color: bridge.isRunning ? "#BA4D36" : "#D95F3C"
+                    }
+
+                    contentItem: Label {
+                        text: parent.text
+                        color: "#FFF8EF"
+                        font: parent.font
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    onClicked: bridge.toggleRun()
                 }
 
                 Button {
-                    text: "继续"
-                    enabled: !timerBridge.is_running && timerBridge.remaining_seconds > 0
-                    Layout.fillWidth: true
-                    onClicked: timerBridge.resume()
-                }
-
-                Button {
+                    Layout.preferredWidth: 110
+                    Layout.preferredHeight: 50
                     text: "重置"
-                    Layout.fillWidth: true
-                    onClicked: timerBridge.reset()
+                    font.family: "Microsoft YaHei UI"
+                    font.pixelSize: 15
+
+                    background: Rectangle {
+                        radius: 14
+                        color: "#F0D9C8"
+                        border.width: 1
+                        border.color: "#D8AF91"
+                    }
+
+                    contentItem: Label {
+                        text: parent.text
+                        color: "#7E402D"
+                        font: parent.font
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    onClicked: bridge.resetSession()
                 }
             }
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 130
-                radius: 20
-                color: "#fff3e8"
+                radius: 16
+                color: "#F4E4D6"
                 border.width: 1
-                border.color: "#efd9c7"
+                border.color: "#DFC0A9"
+                implicitHeight: infoLayout.implicitHeight + 20
 
-                Column {
-                    anchors.centerIn: parent
+                ColumnLayout {
+                    id: infoLayout
+                    anchors.fill: parent
+                    anchors.margins: 10
                     spacing: 8
 
-                    Text {
-                        text: "累计专注: " + timerBridge.total_focus_display
-                        color: root.textStrong
-                        font.pixelSize: 20
-                        font.bold: true
-                        anchors.horizontalCenter: parent.horizontalCenter
+                    Label {
+                        text: "累计专注: " + bridge.totalFocusText
+                        font.family: "Microsoft YaHei UI"
+                        font.pixelSize: 15
+                        color: "#7A412F"
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
                     }
 
-                    Text {
-                        id: titleLabel
-                        text: "当前称号: " + timerBridge.current_title
-                        color: root.textDim
-                        font.pixelSize: 16
-                        anchors.horizontalCenter: parent.horizontalCenter
+                    Label {
+                        text: bridge.nextMilestoneText
+                        font.family: "Microsoft YaHei UI"
+                        font.pixelSize: 13
+                        color: "#8C5A45"
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
                     }
                 }
             }
@@ -189,51 +259,74 @@ ApplicationWindow {
         }
     }
 
-    Popup {
-        id: unlockPopup
-        modal: false
-        focus: false
-        x: (root.width - width) / 2
-        y: 36
-        width: mainCard.width - 40
-        height: 64
-        closePolicy: Popup.NoAutoClose
-        background: Rectangle {
-            radius: 14
-            color: "#e36f47"
-        }
+    Rectangle {
+        id: levelBanner
+        visible: false
+        opacity: 0
+        radius: 14
+        color: "#A7452F"
+        border.width: 1
+        border.color: "#E5B49A"
+        height: 52
+        width: Math.min(parent.width - 40, 420)
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 18
+        z: 10
+
+        property string bannerText: ""
 
         Label {
             anchors.centerIn: parent
-            text: "称号升级: " + titleLabel.text.replace("当前称号: ", "")
-            color: "#fff8f4"
-            font.pixelSize: 18
-            font.bold: true
-        }
-
-        enter: Transition {
-            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 140 }
-            NumberAnimation { property: "scale"; from: 0.92; to: 1.0; duration: 140 }
-        }
-        exit: Transition {
-            NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 180 }
+            text: levelBanner.bannerText
+            font.family: "Microsoft YaHei UI"
+            font.pixelSize: 14
+            color: "#FFF7EE"
         }
     }
 
     Timer {
-        id: popupTimer
-        interval: 1500
-        onTriggered: unlockPopup.close()
+        id: bannerTimer
+        interval: 1700
+        onTriggered: {
+            levelBanner.opacity = 0
+            levelBanner.visible = false
+        }
+    }
+
+    SequentialAnimation {
+        id: tickPulse
+        running: false
+        NumberAnimation { target: timeText; property: "scale"; from: 1.0; to: 1.08; duration: 140 }
+        NumberAnimation { target: timeText; property: "scale"; from: 1.08; to: 1.0; duration: 160 }
+    }
+
+    NumberAnimation {
+        id: bannerFadeIn
+        target: levelBanner
+        property: "opacity"
+        from: 0
+        to: 1
+        duration: 150
     }
 
     Connections {
-        target: timerBridge
+        target: bridge
+
         function onRemainingSecondsChanged() {
-            pulseAnim.restart()
+            tickPulse.restart()
+            ring.requestPaint()
         }
-        function onTitleUnlocked() {
-            unlockPopup.open()
-            popupTimer.restart()
+
+        function onProgressChanged() {
+            // Repaint is handled in onRemainingSecondsChanged to avoid double repaint per tick.
+        }
+
+        function onTitleUpgraded(newTitle) {
+            levelBanner.bannerText = "称号升级: " + newTitle
+            levelBanner.visible = true
+            bannerFadeIn.restart()
+            bannerTimer.restart()
         }
     }
 }
